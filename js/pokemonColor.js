@@ -50,4 +50,7 @@ function pokemonColor(type) {
     if (type == "steel") {
       return "b1beca";
     }
+    if (type == "flying") {
+      return "aac7e2";
+    }
   }
