@@ -6,6 +6,8 @@ const getDoc = function (id) {
   return document.getElementById(`${id}`);
 };
 
+////////////////////////////////////////////////////////////////////////////////////// -- CARD DECK --
+
 async function loadAllPokemon() {
   let url = `https://pokeapi.co/api/v2/pokemon?offset=${offset}=&limit=30`;
   let response = await fetch(url);
@@ -32,6 +34,8 @@ function renderPokemonCards() {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////////// -- CARD DECK END --
+
 function stopProp(event) {
   event.stopPropagation();
 }
@@ -43,38 +47,40 @@ function openPokemonCard(ID) {
   popupContainer.innerHTML = "";
   if (pokemon.types.length == 2) {
     popupContainer.innerHTML += generatePokeCardPopupTwoTypes(pokemon);
+    console.clear();
+    console.log(pokemon);
   } else {
     popupContainer.innerHTML += generatePokeCardPopup(pokemon);
+    console.clear();
+    console.log(pokemon);
   }
 }
 
 function generatePokeCardPopupTwoTypes(pokemon) {
-  return /*html*/ ` 
-  <div onclick="openPokemonCard(${
-    pokemon.id
-  })" id="pokemon_card_wrapper" style="background: #${pokemonColor(
+  return /*html*/`
+  <div onclick="stopProp(event)" id="pokemon_card_popup_wrapper" style="background: #${pokemonColor(
     pokemon.types[0].type.name
   )}">
-    <div id="pokemon_card">
-        <div id="pokemon_card_header">
-            <h1 class="fm-electro-400" id="pokemon_name">${pokemon.name}</h1>
+    <div id="pokemon_popup_card">
+        <div id="pokemon_popup_card_header">
+            <h1 class="fm-electro-400" id="pokemon_popup_name">${pokemon.name}</h1>
              <b>
-              <span class="fm-electro-400" id="pokemon_id">#${pokemon.id
+              <span class="fm-electro-400" id="pokemon_popup_id">#${pokemon.id
                 .toString()
                 .padStart(3, "0")}
               </span>
             </b>
         </div>
-        <div id="pokemon_img_wrapper">
-          <div id="pokemon_type_wrapper">
-            <span class="fm-electro-400" id="pokemon_type_name" style="background: #${pokemonColor(
+        <div id="pokemon_popup_img_wrapper">
+          <div id="pokemon_popup_type_wrapper">
+            <span class="fm-electro-400" id="pokemon_popup_type_name" style="background: #${pokemonColor(
               pokemon.types[0].type.name
             )}">${pokemon.types[0].type.name}</span>
-            <span class="fm-electro-400" id="pokemon_type_name" style="background: #${pokemonColor(
+            <span class="fm-electro-400" id="pokemon_popup_type_name" style="background: #${pokemonColor(
               pokemon.types[1].type.name
             )}">${pokemon.types[1].type.name}</span>
           </div>
-          <img id="pokemon_img" src="${
+          <img id="pokemon_popup_img" src="${
             pokemon.sprites.other.dream_world.front_default
           }">
         </div>
@@ -83,30 +89,30 @@ function generatePokeCardPopupTwoTypes(pokemon) {
 `;
 }
 
+
+
 function generatePokeCardPopup(pokemon) {
   return /*html*/ ` 
-  <div onclick="openPokemonCard(${
-    pokemon.id
-  })" id="pokemon_card_wrapper" style="background: #${pokemonColor(
+  <div onclick="stopProp(event)" id="pokemon_card_popup_wrapper" style="background: #${pokemonColor(
     pokemon.types[0].type.name
   )}">
-    <div id="pokemon_card">
-        <div id="pokemon_card_header">
-            <h1 class="fm-electro-400" id="pokemon_name">${pokemon.name}</h1>
+    <div id="pokemon_popup_card">
+        <div id="pokemon_popup_card_header">
+            <h1 class="fm-electro-400" id="pokemon_popup_name">${pokemon.name}</h1>
              <b>
-              <span class="fm-electro-400" id="pokemon_id">#${pokemon.id
+              <span class="fm-electro-400" id="pokemon_popup_id">#${pokemon.id
                 .toString()
                 .padStart(3, "0")}
               </span>
             </b>
         </div>
-        <div id="pokemon_img_wrapper">
-          <div id="pokemon_type_wrapper">
-            <span class="fm-electro-400" id="pokemon_type_name" style="background: #${pokemonColor(
+        <div id="pokemon_popup_img_wrapper">
+          <div id="pokemon_popup_type_wrapper">
+            <span class="fm-electro-400" id="pokemon_popup_type_name" style="background: #${pokemonColor(
               pokemon.types[0].type.name
             )}">${pokemon.types[0].type.name}</span>
           </div>
-          <img id="pokemon_img" src="${
+          <img id="pokemon_popup_img" src="${
             pokemon.sprites.other.dream_world.front_default
           }">
         </div>
@@ -114,89 +120,15 @@ function generatePokeCardPopup(pokemon) {
   </div>
 `;
 }
-
 
 function closePopup() {
   let popupContainer = getDoc("pokemon-popup-container");
   popupContainer.classList.add("d-none");
 }
 
-
-window.onscroll = function (ev) {
-  if (
-    window.innerHeight + window.pageYOffset >=
-    document.body.offsetHeight - 1
-  ) {
+window.onscroll = async function (ev) {
+  if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight) {
     offset = offset + 30;
-    loadAllPokemon();
+    await loadAllPokemon();
   }
 };
-
-
-
-function generatePokeCards(pokemon) {
-  return /*html*/ ` 
-  <div onclick="openPokemonCard(
-    ${pokemon.id}
-  )" id="pokemon_card_wrapper" style="background: #${pokemonColor(
-    pokemon.types[0].type.name
-  )}">
-    <div id="pokemon_card">
-        <div id="pokemon_card_header">
-            <h1 class="fm-electro-400" id="pokemon_name">${pokemon.name}</h1>
-             <b>
-              <span class="fm-electro-400" id="pokemon_id">#${pokemon.id
-                .toString()
-                .padStart(3, "0")}
-              </span>
-            </b>
-        </div>
-        <div id="pokemon_img_wrapper">
-          <div id="pokemon_type_wrapper">
-            <span class="fm-electro-400" id="pokemon_type_name" style="background: #${pokemonColor(
-              pokemon.types[0].type.name
-            )}">${pokemon.types[0].type.name}</span>
-          </div>
-          <img id="pokemon_img" src="${
-            pokemon.sprites.other.dream_world.front_default
-          }">
-        </div>
-    </div>
-  </div>
-`;
-}
-
-function generatePokeCardsWith2ndType(pokemon) {
-  return /*html*/ ` 
-  <div onclick="openPokemonCard(
-    ${pokemon.id}
-  )" id="pokemon_card_wrapper" style="background: #${pokemonColor(
-    pokemon.types[0].type.name
-  )}">
-    <div id="pokemon_card">
-        <div id="pokemon_card_header">
-            <h1 class="fm-electro-400" id="pokemon_name">${pokemon.name}</h1>
-             <b>
-              <span class="fm-electro-400" id="pokemon_id">#${pokemon.id
-                .toString()
-                .padStart(3, "0")}
-              </span>
-            </b>
-        </div>
-        <div id="pokemon_img_wrapper">
-          <div id="pokemon_type_wrapper">
-            <span class="fm-electro-400" id="pokemon_type_name" style="background: #${pokemonColor(
-              pokemon.types[0].type.name
-            )}">${pokemon.types[0].type.name}</span>
-            <span class="fm-electro-400" id="pokemon_type_name" style="background: #${pokemonColor(
-              pokemon.types[1].type.name
-            )}">${pokemon.types[1].type.name}</span>
-          </div>
-          <img id="pokemon_img" src="${
-            pokemon.sprites.other.dream_world.front_default
-          }">
-        </div>
-    </div>
-  </div>
-`;
-}
