@@ -115,10 +115,12 @@ function generatePokeCardPopup(pokemon) {
 `;
 }
 
+
 function closePopup() {
   let popupContainer = getDoc("pokemon-popup-container");
   popupContainer.classList.add("d-none");
 }
+
 
 window.onscroll = function (ev) {
   if (
@@ -129,6 +131,8 @@ window.onscroll = function (ev) {
     loadAllPokemon();
   }
 };
+
+
 
 function generatePokeCards(pokemon) {
   return /*html*/ ` 
