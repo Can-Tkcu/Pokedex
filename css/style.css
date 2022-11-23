@@ -146,8 +146,8 @@ body {
     max-height: 750px;
     max-width: 450px;
     width: 100%;
-    padding: 15px;
-    border-radius: 30px;
+    padding: 5px;
+    border-radius: 19px;
     position: sticky;
     scale: 0;
     top: 15px;
@@ -168,12 +168,14 @@ body {
     height: 170px;
     width: 170px;
     object-fit: contain;
+    object-position: bottom;
+    margin-bottom: 10px;
 }
 
 #pokemon_popup_detail {
     height: 60%;
     width: 100%;
-    border-radius: 30px 30px 0px 0px ;
+    border-radius: 30px 30px 0px 0px;
     margin-top: -40px;
 }
 
@@ -255,34 +257,79 @@ body {
 
 #pokemon_popup_nav {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    padding-top: 45px;
+    padding-top: 35px;
     width: 100%;
 }
 
-#pokemon_popup_nav ul{
+#pokemon_popup_nav ul {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     text-decoration: none;
     list-style: none;
     padding: 0px 15px;
     margin: unset;
     width: 100%;
+    min-height: 40px;
 }
 
+#moves,
+#evolution,
+#base_stats,
 #about {
+    display: flex;
     font-weight: bold;
+    color: rgb(83, 99, 99);
+    min-width: 102px;
+    justify-content: center;
+    padding: 10px;
+    cursor: pointer;
 }
 
-#base_stats {
-    font-weight: bold;
+#moves:hover,
+#evolution:hover,
+#base_stats:hover,
+#about:hover {
+    transition: all ease-in-out 225ms;
+    background-color: rgba(240, 248, 255, 0.212);
+    border-radius: 10px 10px 0px 0px;
 }
 
-#evolution {
-    font-weight: bold;
+#selected {
+    width: auto;
+    background: rgb(116, 131, 131);
+    height: 4px;
+    margin: 0px 15px;
+    display: flex;
 }
 
-#moves {
+#movesS,
+#evolutionS,
+#base_statsS,
+#aboutS {
+    width: 100%;
+    transition: all ease-in-out 125ms;
+    border-radius: 50vw;
+}
+
+#about_content {
+    padding: 15px 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+#flavor_text {
+    text-transform: uppercase;
+    text-align: center;
+    color: rgb(83, 99, 99);
     font-weight: bold;
+    font-size: 15px;
+
+}
+
+#pokemon_height {
+    font-size: 15px;
+    color: rgb(83, 99, 99);
 }
