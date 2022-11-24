@@ -4,7 +4,11 @@ let loadedSpecies = [];
 
 let loadedText = [];
 
+let loadedLocations = [];
+
 let offset = 0;
+
+let currentCard;
 
 const getDoc = function (id) {
   return document.getElementById(`${id}`);
@@ -21,7 +25,6 @@ async function loadAllPokemon() {
   let loadedPokemon = await response.json();
   for (let i = 0; i < (await loadedPokemon["results"].length); i++) {
     await loadData(loadedPokemon["results"][i]);
-    
   }
   renderPokemonCards();
   console.log(loadedData);
@@ -31,19 +34,28 @@ async function loadData(loadedPokemon) {
   let pokeURL = loadedPokemon["url"];
   let pokeResponse = await fetch(pokeURL);
   let currentPokemon = await pokeResponse.json();
+  await loadLocation(currentPokemon);
   await loadSpecies(currentPokemon);
   loadedData.push(currentPokemon);
 }
 
+async function loadLocation(currentPokemon) {
+  let locationURL = currentPokemon.location_area_encounters;
+  let locationResponse = await fetch(locationURL);
+  let currentPokemonLocation = await locationResponse.json();
+  let locations = currentPokemonLocation[0];
+  loadedLocations.push(locations);
+}
+
 async function loadSpecies(currentPokemon) {
-    let speciesURL = currentPokemon.species.url;
-    let speciesResponse = await fetch(speciesURL);
-    let currentPokemonSpecies = await speciesResponse.json();
-    let genus = currentPokemonSpecies.genera[7].genus;
-    let flavorText = currentPokemonSpecies.flavor_text_entries[3].flavor_text;
-    
-    loadedText.push(flavorText);
-    loadedSpecies.push(genus);
+  let speciesURL = currentPokemon.species.url;
+  let speciesResponse = await fetch(speciesURL);
+  let currentPokemonSpecies = await speciesResponse.json();
+  let genus = currentPokemonSpecies.genera[7].genus;
+  let flavorText = currentPokemonSpecies.flavor_text_entries[3].flavor_text;
+
+  loadedText.push(flavorText);
+  loadedSpecies.push(genus);
 }
 
 function renderPokemonCards() {
@@ -65,34 +77,29 @@ function stopProp(event) {
 }
 
 async function openPokemonCard(ID) {
-  let popupContainer = getDoc("pokemon-popup-container");
+  currentCard = ID;
   let pokemon = loadedData[ID - 1];
   let genus = loadedSpecies[ID - 1];
-  let flavorText = loadedText[ID - 1];
+  let popupContainer = getDoc("pokemon-popup-container");
 
   popupContainer.classList.remove("d-none");
   popupContainer.innerHTML = "";
-  if (pokemon.types.length == 2) {
 
-    popupContainer.innerHTML += generatePokeCardPopupTwoTypes(
-      pokemon,
-      genus,
-      flavorText
-    );
+  if (pokemon.types.length == 2) {
+    popupContainer.innerHTML += generatePokeCardPopupTwoTypes(pokemon, genus);
+
     await includeHTML();
-    showCard();
     selectTab("aboutS");
+    showCard();
+
     console.log(pokemon);
   } else {
+    popupContainer.innerHTML += generatePokeCardPopup(pokemon, genus);
 
-    popupContainer.innerHTML += generatePokeCardPopup(
-      pokemon,
-      genus,
-      flavorText
-    );
     await includeHTML();
     showCard();
     selectTab("aboutS");
+
     console.log(pokemon);
   }
 }
@@ -104,7 +111,7 @@ function showCard() {
   }, 125);
 }
 
-function generatePokeCardPopupTwoTypes(pokemon, genus, flavorText) {
+function generatePokeCardPopupTwoTypes(pokemon, genus) {
   return /*html*/ `
     <div onclick="stopProp(event)" id="pokemon_card_popup_wrapper" style="background: #${pokemonColor(
       pokemon.types[0].type.name
@@ -144,20 +151,12 @@ function generatePokeCardPopupTwoTypes(pokemon, genus, flavorText) {
       <div id="pokemon_popup_detail" style="background: #${pokemonColor(
         pokemon.types[0].type.name
       )}">
-      <div w3-include-html="templates/detail_header.html"></div>
-        <div class="fm-electro-400" id="about_content">
-        <span id="flavor_text">${flavorText
-          .replace("\f", "\n")
-          .replace("\u00ad\n", "")
-          .replace("\u00ad", "")
-          .replace(" -\n", " - ")
-          .replace("-\n", "-")
-          .replace("\n", " ")}</span>
-          <span id="pokemon_height">Pokemon height: ${pokemon.height + "0"}cm</span>
-          <span id="pokemon_height">Pokemon weight: ${pokemon.weight / 10}kg</span>
+        <div w3-include-html="templates/detail_header.html"></div>
+        <div id="detail-content">
+          
         </div>
-      </div>
     </div>
+  </div>
 `;
 }
 
@@ -198,9 +197,12 @@ function generatePokeCardPopup(pokemon, genus) {
       <div id="pokemon_popup_detail" style="background: #${pokemonColor(
         pokemon.types[0].type.name
       )}">
-      <div w3-include-html="templates/detail_header.html"></div>
-      </div>
+        <div w3-include-html="templates/detail_header.html"></div>
+        <div id="detail-content">
+          
+        </div>
     </div>
+  </div>
 `;
 }
 
@@ -220,9 +222,51 @@ window.onscroll = async function (ev) {
   }
 };
 
-function selectTab(ID) {
+function selectTab(tabID) {
+  let ID = currentCard;
+  let pokemon = loadedData[ID - 1];
+  let flavorText = loadedText[ID - 1];
+  let location = loadedLocations[ID - 1];
+  let detailContainer = getDoc("detail-content");
+
   clearStyles();
-  getDoc(ID).style = "background: white";
+
+  if (location == undefined) {
+    location = "location is unknown";
+  } else {
+    location = location.location_area.name;
+  }
+
+  getDoc(tabID).style = "background: white";
+
+  if (tabID == "aboutS") {
+    detailContainer.innerHTML = `
+  <div class="fm-electro-400" id="about_content">
+    <span id="flavor_text">${flavorText
+      .replace("\f", "\n")
+      .replace("\u00ad\n", "")
+      .replace("\u00ad", "")
+      .replace(" -\n", " - ")
+      .replace("-\n", "-")
+      .replace("\n", " ")}</span>
+      <span id="pokemon_height">Pokemon height:  ${pokemon.height / 10}m</span>
+      <span id="pokemon_height">Pokemon weight:  ${pokemon.weight / 10}kg</span>
+      <span id="pokemon_height">Pokemon location: ${location}</span>
+   </div>
+  `;
+  }
+
+  if (tabID == "base_statsS") {
+    detailContainer.innerHTML = `1`;
+  }
+
+  if (tabID == "evolutionS") {
+    detailContainer.innerHTML = `2`;
+  }
+
+  if (tabID == "movesS") {
+    detailContainer.innerHTML = `3`;
+  }
 }
 
 function clearStyles() {
