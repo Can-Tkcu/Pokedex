@@ -6,9 +6,18 @@ let loadedText = [];
 
 let loadedLocations = [];
 
+let loadedStats = [];
+
 let offset = 0;
 
 let currentCard;
+
+let hp;
+let attack;
+let defense;
+let special_attack;
+let special_defense;
+let speed;
 
 const getDoc = function (id) {
   return document.getElementById(`${id}`);
@@ -36,7 +45,13 @@ async function loadData(loadedPokemon) {
   let currentPokemon = await pokeResponse.json();
   await loadLocation(currentPokemon);
   await loadSpecies(currentPokemon);
+  await loadStats(currentPokemon);
   loadedData.push(currentPokemon);
+}
+
+async function loadStats(currentPokemon) {
+  let stats = currentPokemon.stats;
+  loadedStats.push(stats);
 }
 
 async function loadLocation(currentPokemon) {
@@ -59,7 +74,7 @@ async function loadSpecies(currentPokemon) {
 }
 
 function renderPokemonCards() {
-  let cardDeck = getDoc("pokemon-container");
+  let cardDeck = getDoc("pokemon_container");
   for (let i = offset; i < loadedData.length; i++) {
     const pokemon = loadedData[i];
     if (pokemon.types.length == 2) {
@@ -80,7 +95,7 @@ async function openPokemonCard(ID) {
   currentCard = ID;
   let pokemon = loadedData[ID - 1];
   let genus = loadedSpecies[ID - 1];
-  let popupContainer = getDoc("pokemon-popup-container");
+  let popupContainer = getDoc("pokemon_popup_container");
 
   popupContainer.classList.remove("d-none");
   popupContainer.innerHTML = "";
@@ -111,103 +126,8 @@ function showCard() {
   }, 125);
 }
 
-function generatePokeCardPopupTwoTypes(pokemon, genus) {
-  return /*html*/ `
-    <div onclick="stopProp(event)" id="pokemon_card_popup_wrapper" style="background: #${pokemonColor(
-      pokemon.types[0].type.name
-    )}">
-      <div id="pokemon_popup_card">
-          <div id="pokemon_popup_img_wrapper">
-            <div id="pokemon_popup_type_wrapper">
-            <div id="pokemon_popup_header_exit"><img onclick="closePopup()" src="./img/back-arrow.png"></div>
-                <div id="pokemon_popup_card_header">
-                  <h1 class="fm-electro-400" id="pokemon_popup_name">${
-                    pokemon.name
-                  }</h1>
-                  <b>
-                    <span class="fm-electro-400" id="pokemon_popup_id">#${pokemon.id
-                      .toString()
-                      .padStart(3, "0")}
-                    </span>
-                  </b>
-              </div>
-              <div id="pokemon_popup_types">
-                <div id="type_wrapper">        
-                  <span class="fm-electro-400" id="pokemon_popup_type_name" style="background: #${pokemonColor(
-                    pokemon.types[0].type.name
-                  )}">${pokemon.types[0].type.name}</span>
-                  <span class="fm-electro-400" id="pokemon_popup_type_name" style="background: #${pokemonColor(
-                    pokemon.types[1].type.name
-                  )}">${pokemon.types[1].type.name}</span>
-                </div>
-                <span class="fm-electro-400" id="pokemon_genus">${genus}</span>
-              </div>
-            </div>
-            <img id="pokemon_popup_img" src="${
-              pokemon.sprites.other.dream_world.front_default
-            }">
-          </div>
-      </div>
-      <div id="pokemon_popup_detail" style="background: #${pokemonColor(
-        pokemon.types[0].type.name
-      )}">
-        <div w3-include-html="templates/detail_header.html"></div>
-        <div id="detail-content">
-          
-        </div>
-    </div>
-  </div>
-`;
-}
-
-function generatePokeCardPopup(pokemon, genus) {
-  return /*html*/ ` 
-  <div onclick="stopProp(event)" id="pokemon_card_popup_wrapper" style="background: #${pokemonColor(
-    pokemon.types[0].type.name
-  )}">
-      <div id="pokemon_popup_card">
-          <div id="pokemon_popup_img_wrapper">
-            <div id="pokemon_popup_type_wrapper">
-            <div id="pokemon_popup_header_exit"><img onclick="closePopup()" src="./img/back-arrow.png"></div>
-                <div id="pokemon_popup_card_header">
-                  <h1 class="fm-electro-400" id="pokemon_popup_name">${
-                    pokemon.name
-                  }</h1>
-                  <b>
-                    <span class="fm-electro-400" id="pokemon_popup_id">#${pokemon.id
-                      .toString()
-                      .padStart(3, "0")}
-                    </span>
-                  </b>
-              </div>
-              <div id="pokemon_popup_types">
-                <div id="type_wrapper">        
-                  <span class="fm-electro-400" id="pokemon_popup_type_name" style="background: #${pokemonColor(
-                    pokemon.types[0].type.name
-                  )}">${pokemon.types[0].type.name}</span>
-                </div>
-                <span class="fm-electro-400" id="pokemon_genus">${genus}</span>
-              </div>
-            </div>
-            <img id="pokemon_popup_img" src="${
-              pokemon.sprites.other.dream_world.front_default
-            }">
-          </div>
-      </div>
-      <div id="pokemon_popup_detail" style="background: #${pokemonColor(
-        pokemon.types[0].type.name
-      )}">
-        <div w3-include-html="templates/detail_header.html"></div>
-        <div id="detail-content">
-          
-        </div>
-    </div>
-  </div>
-`;
-}
-
 async function closePopup() {
-  let popupContainer = getDoc("pokemon-popup-container");
+  let popupContainer = getDoc("pokemon_popup_container");
   let popupCard = getDoc("pokemon_card_popup_wrapper");
   popupCard.classList.remove("scale");
   setTimeout(function () {
@@ -215,18 +135,24 @@ async function closePopup() {
   }, 225);
 }
 
-window.onscroll = async function (ev) {
-  if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight) {
-    offset = offset + 30;
-    await loadAllPokemon();
-  }
-};
+function baseStatVariables() {
+  stats = loadedStats[currentCard - 1];
+  hp = stats[0];
+  attack = stats[1];
+  defense = stats[2];
+  special_attack = stats[3];
+  special_defense = stats[4];
+  speed = stats[5];
+}
 
 function selectTab(tabID) {
   let ID = currentCard;
   let pokemon = loadedData[ID - 1];
   let flavorText = loadedText[ID - 1];
   let location = loadedLocations[ID - 1];
+
+  baseStatVariables();
+
   let detailContainer = getDoc("detail-content");
 
   clearStyles();
@@ -240,24 +166,15 @@ function selectTab(tabID) {
   getDoc(tabID).style = "background: white";
 
   if (tabID == "aboutS") {
-    detailContainer.innerHTML = `
-  <div class="fm-electro-400" id="about_content">
-    <span id="flavor_text">${flavorText
-      .replace("\f", "\n")
-      .replace("\u00ad\n", "")
-      .replace("\u00ad", "")
-      .replace(" -\n", " - ")
-      .replace("-\n", "-")
-      .replace("\n", " ")}</span>
-      <span id="pokemon_height">Pokemon height:  ${pokemon.height / 10}m</span>
-      <span id="pokemon_height">Pokemon weight:  ${pokemon.weight / 10}kg</span>
-      <span id="pokemon_height">Pokemon location: ${location}</span>
-   </div>
-  `;
+    detailContainer.innerHTML = generateAboutTabHTML(
+      flavorText,
+      pokemon,
+      location
+    );
   }
 
   if (tabID == "base_statsS") {
-    detailContainer.innerHTML = `1`;
+    detailContainer.innerHTML = generateBaseStatsHTML();
   }
 
   if (tabID == "evolutionS") {
@@ -275,3 +192,10 @@ function clearStyles() {
   getDoc("evolutionS").style = "";
   getDoc("movesS").style = "";
 }
+
+window.onscroll = async function (ev) {
+  if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight) {
+    offset = offset + 30;
+    await loadAllPokemon();
+  }
+};
