@@ -8,16 +8,25 @@ let loadedLocations = [];
 
 let loadedStats = [];
 
+let loadedEvolutionChains = [];
+
 let offset = 0;
 
 let currentCard;
 
+//variables for base_stats
 let hp;
 let attack;
 let defense;
 let special_attack;
 let special_defense;
 let speed;
+
+// variables for evolutions
+let interval = 0;
+let first;
+let second;
+let third;
 
 const getDoc = function (id) {
   return document.getElementById(`${id}`);
@@ -66,11 +75,18 @@ async function loadSpecies(currentPokemon) {
   let speciesURL = currentPokemon.species.url;
   let speciesResponse = await fetch(speciesURL);
   let currentPokemonSpecies = await speciesResponse.json();
+
+  let evolutionChainURL = currentPokemonSpecies.evolution_chain.url;
+  let evolutionResponse = await fetch(evolutionChainURL);
+  let pokemonEvolutionData = await evolutionResponse.json();
+
   let genus = currentPokemonSpecies.genera[7].genus;
   let flavorText = currentPokemonSpecies.flavor_text_entries[3].flavor_text;
+  let evolutionChain = pokemonEvolutionData.chain;
 
   loadedText.push(flavorText);
   loadedSpecies.push(genus);
+  loadedEvolutionChains.push(evolutionChain);
 }
 
 function renderPokemonCards() {
@@ -145,11 +161,29 @@ function baseStatVariables() {
   speed = stats[5];
 }
 
+function pokemonImg(param) {
+  loadedData.find((pokemon) => {
+    if (pokemon.name === param) {
+      if (interval == 0) {
+        first = pokemon.id;
+      }
+      if (interval == 1) {
+        second = pokemon.id;
+      }
+      if (interval == 2) {
+        third = pokemon.id;
+      }
+      interval++;
+    }
+  });
+}
+
 function selectTab(tabID) {
   let ID = currentCard;
   let pokemon = loadedData[ID - 1];
   let flavorText = loadedText[ID - 1];
   let location = loadedLocations[ID - 1];
+  let evolution = loadedEvolutionChains[ID - 1];
 
   baseStatVariables();
 
@@ -174,15 +208,30 @@ function selectTab(tabID) {
   }
 
   if (tabID == "base_statsS") {
-    detailContainer.innerHTML = generateBaseStatsHTML();
+    detailContainer.innerHTML = generateBaseStatsTabHTML();
   }
 
   if (tabID == "evolutionS") {
-    detailContainer.innerHTML = `2`;
+    if (evolution.evolves_to[0].evolves_to.length == 0) {
+      generateEvolutionsTwoEvos(evolution, detailContainer);
+    } else {
+      generateEvolutionsThreeEvos(evolution, detailContainer);
+    }
   }
 
   if (tabID == "movesS") {
-    detailContainer.innerHTML = `3`;
+    detailContainer.innerHTML = "";
+    renderMoves(pokemon, detailContainer);
+  }
+}
+
+function renderMoves(pokemon, detailContainer) {
+  detailContainer.innerHTML = `<div id="moves_content"></div>`;
+  for (let i = 0; i < pokemon.moves.length; i++) {
+    const element = pokemon.moves[i].move.name;
+    moves_content.innerHTML += `
+      <span class="fm-electro-400" id="move">${element}</span> 
+    `;
   }
 }
 
@@ -199,3 +248,54 @@ window.onscroll = async function (ev) {
     await loadAllPokemon();
   }
 };
+
+function nextPokemon(currentCard) {
+  currentCard++;
+  openPokemonCard(currentCard);
+}
+
+function prevPokemon(currentCard) {
+  if (currentCard == 1) {
+    openPokemonCard(currentCard);
+  } else {
+    currentCard--;
+    openPokemonCard(currentCard);
+  }
+}
+
+function showLoadingScreen() {}
+
+function hideLoadingScreen() {}
+
+function searchPokemon() {
+  let cardDeck = getDoc("pokemon_container");
+  let searchInput = getDoc("search_pokemon");
+  cardDeck.innerHTML = "";
+  filterPokemon(searchInput);
+  if (searchInput.value == " ") {
+    cardDeck.innerHTML = "";
+    renderPokemonCards();
+  } else {
+    cardDeck.innerHTML = "";
+    renderFilteredPokemon(cardDeck);
+  }
+}
+
+let filteredPokemon = [];
+
+function filterPokemon(searchInput) {
+  filteredPokemon = loadedData.filter((pokemon) =>
+    pokemon.name.includes(searchInput.value.toLowerCase())
+  );
+}
+
+function renderFilteredPokemon(cardDeck) {
+  for (let i = 0; i < filteredPokemon.length; i++) {
+    const pokemon = filteredPokemon[i];
+    if (pokemon.types.length == 2) {
+      cardDeck.innerHTML += generatePokeCardsWith2ndType(pokemon);
+    } else {
+      cardDeck.innerHTML += generatePokeCards(pokemon);
+    }
+  }
+}
