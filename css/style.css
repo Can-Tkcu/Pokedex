@@ -22,8 +22,15 @@ body {
     height: 120px;
     width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    padding: 0px 80px;
+}
+
+#header_img_wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 #header_img_hero {
@@ -505,6 +512,16 @@ body {
     width: 32px;
 }
 
+#search_pokemon {
+    border: none;
+    border-radius: 50vw;
+    outline: none;
+    appearance: none;
+    padding: 10px;
+    width: 300px;
+    font-size: 21px;
+    text-align: center;
+}
 
 
 
@@ -512,11 +529,15 @@ body {
    
 
     #pokemon_card_wrapper {
-        top: 10px;
+        top: 100px;
+    }
+    #header_img_wrapper {
+        display: none;
     }
 
     #header {
-        /* display: none; */
+        justify-content: center;
+        padding: unset;
     }
 
 
@@ -661,4 +682,15 @@ body {
     #evolutions_content {
         height: 268px
     }
+}
+
+#loader {
+    background: #181B1D url(/img/pokeball_anim.gif) no-repeat center center;
+    background-size: 30%;
+    height: 100vh;
+    width: 100%;
+    position: fixed;
+    z-index: 100;
+    opacity: 0.5;
+    transition: all 225ms;
 }

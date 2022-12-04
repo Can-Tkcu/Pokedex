@@ -35,6 +35,10 @@ const getDoc = function (id) {
 async function init() {
   await loadAllPokemon();
 }
+
+// window.addEventListener("load", function(){
+//   loader.style.display = "none";
+// })
 ////////////////////////////////////////////////////////////////////////////////////// -- CARD DECK --
 
 async function loadAllPokemon() {
@@ -42,7 +46,9 @@ async function loadAllPokemon() {
   let response = await fetch(url);
   let loadedPokemon = await response.json();
   for (let i = 0; i < (await loadedPokemon["results"].length); i++) {
+    showLoadingScreen();
     await loadData(loadedPokemon["results"][i]);
+    hideLoadingScreen();
   }
   renderPokemonCards();
   console.log(loadedData);
@@ -263,9 +269,15 @@ function prevPokemon(currentCard) {
   }
 }
 
-function showLoadingScreen() {}
+function showLoadingScreen() {
+  let loader = getDoc("loader");
+  loader.style.display = "block";
+}
 
-function hideLoadingScreen() {}
+function hideLoadingScreen() {
+  let loader = getDoc("loader");
+  loader.style.display = "none";
+}
 
 function searchPokemon() {
   let cardDeck = getDoc("pokemon_container");
