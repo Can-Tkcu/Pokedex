@@ -10,6 +10,8 @@ let loadedStats = [];
 
 let loadedEvolutionChains = [];
 
+let filteredPokemon = [];
+
 let offset = 0;
 
 let currentCard;
@@ -39,7 +41,8 @@ async function init() {
 // window.addEventListener("load", function(){
 //   loader.style.display = "none";
 // })
-////////////////////////////////////////////////////////////////////////////////////// -- CARD DECK --
+
+////////////////////////////////////////////////////////////////////////////////////// -- LOAD FUNCTIONS --
 
 async function loadAllPokemon() {
   let url = `https://pokeapi.co/api/v2/pokemon?offset=${offset}=&limit=30`;
@@ -86,14 +89,25 @@ async function loadSpecies(currentPokemon) {
   let evolutionResponse = await fetch(evolutionChainURL);
   let pokemonEvolutionData = await evolutionResponse.json();
 
+  setVariables(currentPokemonSpecies, pokemonEvolutionData);
+}
+
+function setVariables(currentPokemonSpecies, pokemonEvolutionData) {
   let genus = currentPokemonSpecies.genera[7].genus;
   let flavorText = currentPokemonSpecies.flavor_text_entries[3].flavor_text;
   let evolutionChain = pokemonEvolutionData.chain;
+  pushResults(genus, flavorText, evolutionChain);
+}
 
+function pushResults(genus, flavorText, evolutionChain) {
   loadedText.push(flavorText);
   loadedSpecies.push(genus);
   loadedEvolutionChains.push(evolutionChain);
 }
+
+////////////////////////////////////////////////////////////////////////////////////// -- LOAD FUNCTIONS END --
+
+////////////////////////////////////////////////////////////////////////////////////// -- RENDERS --
 
 function renderPokemonCards() {
   let cardDeck = getDoc("pokemon_container");
@@ -107,38 +121,33 @@ function renderPokemonCards() {
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////////// -- CARD DECK END --
+function renderMoves(pokemon, detailContainer) {
+  detailContainer.innerHTML = `<div id="moves_content"></div>`;
+  for (let i = 0; i < pokemon.moves.length; i++) {
+    const element = pokemon.moves[i].move.name;
+    moves_content.innerHTML += `
+      <span class="fm-electro-400" id="move">${element}</span> 
+    `;
+  }
+}
+
+function renderFilteredPokemon(cardDeck) {
+  for (let i = 0; i < filteredPokemon.length; i++) {
+    const pokemon = filteredPokemon[i];
+    if (pokemon.types.length == 2) {
+      cardDeck.innerHTML += generatePokeCardsWith2ndType(pokemon);
+    } else {
+      cardDeck.innerHTML += generatePokeCards(pokemon);
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////// -- RENDERS END --
+
+////////////////////////////////////////////////////////////////////////////////////// -- UTILITY FUNCTIONS -- // Functions that handle basic HTML/CSS/JS
 
 function stopProp(event) {
   event.stopPropagation();
-}
-
-async function openPokemonCard(ID) {
-  currentCard = ID;
-  let pokemon = loadedData[ID - 1];
-  let genus = loadedSpecies[ID - 1];
-  let popupContainer = getDoc("pokemon_popup_container");
-
-  popupContainer.classList.remove("d-none");
-  popupContainer.innerHTML = "";
-
-  if (pokemon.types.length == 2) {
-    popupContainer.innerHTML += generatePokeCardPopupTwoTypes(pokemon, genus);
-
-    await includeHTML();
-    selectTab("aboutS");
-    showCard();
-
-    console.log(pokemon);
-  } else {
-    popupContainer.innerHTML += generatePokeCardPopup(pokemon, genus);
-
-    await includeHTML();
-    showCard();
-    selectTab("aboutS");
-
-    console.log(pokemon);
-  }
 }
 
 function showCard() {
@@ -155,6 +164,41 @@ async function closePopup() {
   setTimeout(function () {
     popupContainer.classList.add("d-none");
   }, 225);
+}
+
+function clearStyles() {
+  getDoc("aboutS").style = "";
+  getDoc("base_statsS").style = "";
+  getDoc("evolutionS").style = "";
+  getDoc("movesS").style = "";
+}
+
+function nextPokemon(currentCard) {
+  currentCard++;
+  openPokemonCard(currentCard);
+}
+
+function prevPokemon(currentCard) {
+  if (currentCard == 1) {
+    openPokemonCard(currentCard);
+  } else {
+    currentCard--;
+    openPokemonCard(currentCard);
+  }
+}
+
+function showLoadingScreen() {
+  let loader = getDoc("loader");
+  loader.style.display = "block";
+}
+
+function hideLoadingScreen() {
+  let loader = getDoc("loader");
+  loader.style.display = "none";
+}
+
+function markCurrentTab(tabID) {
+  getDoc(tabID).style = "background: white";
 }
 
 function baseStatVariables() {
@@ -184,99 +228,25 @@ function pokemonImg(param) {
   });
 }
 
-function selectTab(tabID) {
-  let ID = currentCard;
-  let pokemon = loadedData[ID - 1];
-  let flavorText = loadedText[ID - 1];
-  let location = loadedLocations[ID - 1];
-  let evolution = loadedEvolutionChains[ID - 1];
-
-  baseStatVariables();
-
-  let detailContainer = getDoc("detail-content");
-
-  clearStyles();
-
-  if (location == undefined) {
-    location = "location is unknown";
-  } else {
-    location = location.location_area.name;
-  }
-
-  getDoc(tabID).style = "background: white";
-
-  if (tabID == "aboutS") {
-    detailContainer.innerHTML = generateAboutTabHTML(
-      flavorText,
-      pokemon,
-      location
-    );
-  }
-
-  if (tabID == "base_statsS") {
-    detailContainer.innerHTML = generateBaseStatsTabHTML();
-  }
-
-  if (tabID == "evolutionS") {
-    if (evolution.evolves_to[0].evolves_to.length == 0) {
-      generateEvolutionsTwoEvos(evolution, detailContainer);
-    } else {
-      generateEvolutionsThreeEvos(evolution, detailContainer);
-    }
-  }
-
-  if (tabID == "movesS") {
-    detailContainer.innerHTML = "";
-    renderMoves(pokemon, detailContainer);
-  }
+function clearCard() {
+  popupContainer.classList.remove("d-none");
+  popupContainer.innerHTML = "";
 }
 
-function renderMoves(pokemon, detailContainer) {
-  detailContainer.innerHTML = `<div id="moves_content"></div>`;
-  for (let i = 0; i < pokemon.moves.length; i++) {
-    const element = pokemon.moves[i].move.name;
-    moves_content.innerHTML += `
-      <span class="fm-electro-400" id="move">${element}</span> 
-    `;
-  }
+async function setDefaultTab() {
+  await includeHTML();
+  showCard();
+  selectTab("aboutS");
 }
 
-function clearStyles() {
-  getDoc("aboutS").style = "";
-  getDoc("base_statsS").style = "";
-  getDoc("evolutionS").style = "";
-  getDoc("movesS").style = "";
-}
+////////////////////////////////////////////////////////////////////////////////////// -- UTILITY FUNCTIONS END --
 
-window.onscroll = async function (ev) {
-  if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight) {
-    offset = offset + 30;
-    await loadAllPokemon();
-  }
-};
+////////////////////////////////////////////////////////////////////////////////////// -- FILTER --
 
-function nextPokemon(currentCard) {
-  currentCard++;
-  openPokemonCard(currentCard);
-}
-
-function prevPokemon(currentCard) {
-  if (currentCard == 1) {
-    openPokemonCard(currentCard);
-  } else {
-    currentCard--;
-    openPokemonCard(currentCard);
-  }
-}
-
-function showLoadingScreen() {
-  let loader = getDoc("loader");
-  loader.style.display = "block";
-}
-
-function hideLoadingScreen() {
-  let loader = getDoc("loader");
-  loader.style.display = "none";
+function filterPokemon(searchInput) {
+  filteredPokemon = loadedData.filter((pokemon) =>
+    pokemon.name.includes(searchInput.value.toLowerCase())
+  );
 }
 
 function searchPokemon() {
@@ -293,21 +263,91 @@ function searchPokemon() {
   }
 }
 
-let filteredPokemon = [];
+////////////////////////////////////////////////////////////////////////////////////// -- FILTER END -- 
 
-function filterPokemon(searchInput) {
-  filteredPokemon = loadedData.filter((pokemon) =>
-    pokemon.name.includes(searchInput.value.toLowerCase())
-  );
+////////////////////////////////////////////////////////////////////////////////////// -- CARD LOGIC --
+
+async function openPokemonCard(ID) {
+  currentCard = ID;
+  let pokemon = loadedData[ID - 1];
+  let genus = loadedSpecies[ID - 1];
+  let popupContainer = getDoc("pokemon_popup_container");
+  clearCard();
+  if (pokemon.types.length == 2) {
+    popupContainer.innerHTML += generatePokeCardPopupTwoTypes(pokemon, genus);
+    setDefaultTab();
+  } else {
+    popupContainer.innerHTML += generatePokeCardPopup(pokemon, genus);
+    setDefaultTab();
+  }
 }
 
-function renderFilteredPokemon(cardDeck) {
-  for (let i = 0; i < filteredPokemon.length; i++) {
-    const pokemon = filteredPokemon[i];
-    if (pokemon.types.length == 2) {
-      cardDeck.innerHTML += generatePokeCardsWith2ndType(pokemon);
+function selectTab(tabID) {
+  let ID = currentCard;
+  let pokemon = loadedData[ID - 1];
+  let flavorText = loadedText[ID - 1];
+  let location = loadedLocations[ID - 1];
+  let evolution = loadedEvolutionChains[ID - 1];
+  let detailContainer = getDoc("detail-content");
+  clearStyles();
+  markCurrentTab(tabID);
+  //The section below generates all the HTML and JS for each card and displays the data
+  generateAboutTab(tabID, location, flavorText, pokemon, detailContainer);
+  generateBaseStatsTab(tabID, detailContainer);
+  generateEvosTab(tabID, evolution, detailContainer);
+  generateMovesTab(tabID, pokemon, detailContainer);
+}
+
+function generateMovesTab(tabID, pokemon, detailContainer) {
+  if (tabID == "movesS") {
+    detailContainer.innerHTML = "";
+    renderMoves(pokemon, detailContainer);
+  }
+}
+
+function generateEvosTab(tabID, evolution, detailContainer) {
+  if (tabID == "evolutionS") {
+    if (evolution.evolves_to[0].evolves_to.length == 0) {
+      generateEvolutionsTwoEvos(evolution, detailContainer);
     } else {
-      cardDeck.innerHTML += generatePokeCards(pokemon);
+      generateEvolutionsThreeEvos(evolution, detailContainer);
     }
   }
 }
+
+function generateBaseStatsTab(tabID, detailContainer) {
+  baseStatVariables();
+  if (tabID == "base_statsS") {
+    detailContainer.innerHTML = generateBaseStatsTabHTML();
+  }
+}
+
+function generateAboutTab(
+  tabID,
+  location,
+  flavorText,
+  pokemon,
+  detailContainer
+) {
+  if (location == undefined) {
+    location = "location is unknown";
+  } else {
+    location = location.location_area.name;
+  }
+  if (tabID == "aboutS") {
+    detailContainer.innerHTML = generateAboutTabHTML(
+      flavorText,
+      pokemon,
+      location
+    );
+  }
+}
+
+window.onscroll = async function (ev) {
+  if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight) {
+    offset = offset + 30;
+    await loadAllPokemon();
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////////// -- CARD LOGIC END --

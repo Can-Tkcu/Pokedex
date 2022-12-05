@@ -4,25 +4,19 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="./img/pokeball.png">
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/fonts.css">
     <script src="./js/script.js" defer></script>
     <script src="./js/includeHTML.js"></script>
     <script src="./js/templates.js"></script>
     <script src="./js/pokemonColor.js"></script>
-
     <title>Pokedex</title>
 </head>
 <body onload="init(); includeHTML()">
     <div id="loader"></div>
     <div id="header_container" w3-include-html="templates/header.html"></div>
-    <div id="pokemon_container">
-        
-    </div>
-
-    <div onclick="closePopup()" class="d-none" id="pokemon_popup_container">
-
-    </div>
-    
+    <div id="pokemon_container"></div>
+    <div onclick="closePopup()" class="d-none" id="pokemon_popup_container"></div>
 </body>
 </html>

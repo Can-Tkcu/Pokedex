@@ -8,15 +8,45 @@ body {
     position: relative;
 }
 
+/*UTILITY*/
+.d-none {
+    display: none !important;
+}
+
+/*UTILITY END*/
+
 /*FONT FAMILY*/
 .fm-electro-400 {
     font-family: 'Electrolize';
 }
+/*FONT FAMILY END*/
 
+/*CUSTOM SCROLLBAR*/
 
-.d-none {
-    display: none !important;
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
 }
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(83, 99, 99);
+}
+
+/*CUSTOM SCROLLBAR END*/
+
+
 
 #header {
     height: 120px;
@@ -439,7 +469,7 @@ body {
     height: 8px;
     border-radius: 0px 50vw 0px 50vw;
     background: white;
-    max-width: 410px;
+    max-width: 382px;
 }
 
 #evolutions_content {
@@ -495,6 +525,7 @@ body {
     padding: 10px;
     margin: 10px;
 }
+
 #about_content::-webkit-scrollbar,
 #moves_content::-webkit-scrollbar {
     display: none;
@@ -521,24 +552,29 @@ body {
     width: 300px;
     font-size: 21px;
     text-align: center;
+    background: rgb(147 147 147);
+    color: white;
+    text-transform: capitalize;
 }
 
-
-
-@media (max-width: 450px) {
-   
-
-    #pokemon_card_wrapper {
-        top: 100px;
-    }
-    #header_img_wrapper {
-        display: none;
-    }
-
+@media (max-width: 735px) {
     #header {
         justify-content: center;
         padding: unset;
     }
+
+    #header_img_wrapper {
+        display: none;
+    }
+}
+
+@media (max-width: 450px) {
+
+
+    #pokemon_card_wrapper {
+        top: 100px;
+    }
+
 
 
     #pokemon_card_popup_wrapper {
@@ -685,7 +721,7 @@ body {
 }
 
 #loader {
-    background: #181B1D url(/img/pokeball_anim.gif) no-repeat center center;
+    background: #181B1D url(../img/pokeball_anim.gif) no-repeat center center;
     background-size: 30%;
     height: 100vh;
     width: 100%;
